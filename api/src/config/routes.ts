@@ -2,30 +2,16 @@ import { Router } from "express";
 import passport from "passport";
 
 import { AuthenticationController } from "@features/auth";
-import { ProductController } from "@features/product";
+import OrdersController from "@features/orders/orders.controller";
 
 const routes = Router();
+
 routes.get("/auth/install", AuthenticationController.install);
-routes.post(
-  "/products",
-  passport.authenticate("jwt", { session: false }),
-  ProductController.create
-);
 
 routes.get(
-  "/products/total",
+  "/orders",
   passport.authenticate("jwt", { session: false }),
-  ProductController.getTotal
-);
-routes.get(
-  "/products",
-  passport.authenticate("jwt", { session: false }),
-  ProductController.getAll
-);
-routes.delete(
-  "/products/:id",
-  passport.authenticate("jwt", { session: false }),
-  ProductController.delete
+  OrdersController.getAll
 );
 
 export default routes;

@@ -8,7 +8,7 @@ import {
   Text,
 } from "@nimbus-ds/components";
 import { SlidersIcon } from "@nimbus-ds/icons";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getOrders, Order, Product } from "@/services/orders";
 
 export default function OrdersPage() {
