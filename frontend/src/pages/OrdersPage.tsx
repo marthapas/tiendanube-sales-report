@@ -13,7 +13,7 @@ import { getOrders, Order, Product } from "@/services/orders";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set());
+  const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
 
   useEffect(() => {
     async function loadOrders() {
@@ -25,12 +25,10 @@ export default function OrdersPage() {
   }, []);
 
   const toggleOrder = (id: number) => {
-    setExpandedOrders(prev => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
+    setExpandedOrder(current =>
+        current === id ? null : id
+    );
+};
 
   const paymentLabels: Record<string, string> = {
     cash: "Efectivo",
@@ -182,14 +180,20 @@ export default function OrdersPage() {
                       </Table.Cell>
 
                       <Table.Cell>
-                        <Text
-                          cursor="pointer"
-                          fontWeight="medium"
-                          onClick={() => toggleOrder(order.id)}
+                        <Box
+                            display="flex"
+                            alignItems="center"
+                            gap="1"
+                            cursor="pointer"
+                            onClick={() => toggleOrder(order.id)}
                         >
-                          {order.products.length}{" "}
-                          {expandedOrders.has(order.id) ? "▲" : "▼"}
-                        </Text>
+                            <Text fontWeight="medium">
+                                {order.products.length} unid.
+                            </Text>
+                            <Text>
+                              {expandedOrder === order.id ? "▲" : "▼"}
+                            </Text>
+                        </Box>
                       </Table.Cell>
 
                       <Table.Cell>
@@ -205,37 +209,103 @@ export default function OrdersPage() {
                       </Table.Cell>
                     </Table.Row>
 
-                    {expandedOrders.has(order.id) && (
-                      <Table.Row>
-                        <Table.Cell colSpan={7}>
-                          <Box
-                            display="flex"
-                            flexDirection="column"
-                            gap="2"
-                            padding="2"
-                          >
-                            {order.products.map((product: Product) => (
+                    {expandedOrder === order.id && (
+                      <Table.Row backgroundColor="neutral-surface">
+                          <Table.Cell colSpan={7} padding="0">
                               <Box
-                                key={product.id}
-                                display="flex"
-                                justifyContent="space-between"
+                                  padding="4"
+                                  display="flex"
+                                  flexDirection="column"
+                                  gap="3"
                               >
-                                <Text>
-                                  {product.quantity} × {product.name}
-                                </Text>
 
-                                <Text>
-                                  {new Intl.NumberFormat("es-MX", {
-                                    style: "currency",
-                                    currency: "MXN",
-                                  }).format(Number(product.price))}
-                                </Text>
+                                  <Table>
+                                      <>
+                                          <Table.Head>
+                                              <Table.Row>
+                                                  <Table.Cell as="th">
+                                                      Producto
+                                                  </Table.Cell>
+
+                                                  <Table.Cell
+                                                      as="th"
+                                                      textAlign="center"
+                                                  >
+                                                      Cantidad
+                                                  </Table.Cell>
+
+                                                  <Table.Cell
+                                                      as="th"
+                                                      textAlign="right"
+                                                  >
+                                                      Precio Unitario
+                                                  </Table.Cell>
+
+                                                  <Table.Cell
+                                                      as="th"
+                                                      textAlign="right"
+                                                  >
+                                                      Total
+                                                  </Table.Cell>
+                                              </Table.Row>
+                                          </Table.Head>
+
+                                          <Table.Body>
+
+                                              {order.products.map((product: Product) => (
+                                                  <Table.Row key={product.id}>
+                                                      <Table.Cell>
+                                                          <Box
+                                                              display="flex"
+                                                              flexDirection="column"
+                                                              gap="1"
+                                                          >
+                                                              <Text fontWeight="medium">
+                                                                  {product.name}
+                                                              </Text>
+                                                              {product.barcode && (
+                                                                  <Text
+                                                                      color="neutral-textLow"
+                                                                      fontSize="caption"
+                                                                  >
+                                                                      {product.barcode}
+                                                                  </Text>
+                                                              )}
+                                                          </Box>
+                                                      </Table.Cell>
+                                                      <Table.Cell textAlign="center">
+                                                          {product.quantity}
+                                                      </Table.Cell>
+                                                      <Table.Cell textAlign="right">
+                                                          {new Intl.NumberFormat(
+                                                              "es-MX",
+                                                              {
+                                                                  style: "currency",
+                                                                  currency: "MXN"
+                                                              }
+                                                          ).format(Number(product.price))}
+                                                      </Table.Cell>
+                                                      <Table.Cell textAlign="right">
+                                                          {new Intl.NumberFormat(
+                                                              "es-MX",
+                                                              {
+                                                                  style: "currency",
+                                                                  currency: "MXN"
+                                                              }
+                                                          ).format(
+                                                              Number(product.price) *
+                                                              product.quantity
+                                                          )}
+                                                      </Table.Cell>
+                                                  </Table.Row>
+                                              ))}
+                                          </Table.Body>
+                                      </>
+                                  </Table>
                               </Box>
-                            ))}
-                          </Box>
-                        </Table.Cell>
+                          </Table.Cell>
                       </Table.Row>
-                    )}
+                  )}
                   </React.Fragment>
                 ))}
               </Table.Body>
